@@ -1,0 +1,57 @@
+.sortable {
+  margin: 0;
+  padding: 0;
+}
+
+.toolbox__tools {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin: 0;
+  padding: 8px 0;
+  list-style-type: none;
+}
+
+.toolbox__tools > li {
+  margin-right: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.toolbox__tools > li .branch-row,
+.toolbox__tools > li .page-tree {
+  display: none !important;
+}
+
+#aardwolf-pages li .tool {
+  display: none !important;
+}
+
+#aardwolf-pages.\--is-hover ul.sortable {
+  padding-bottom: 8px;
+  background-color: rgba(58, 163, 227, 0.4);
+}
+
+#aardwolf-pages.\--is-saving {
+  -webkit-filter: blur(1px);
+          filter: blur(1px);
+  opacity: 0.8;
+}
+
+#aardwolf-pages .branch-row.sortable-ghost {
+  opacity: 0.8;
+}
+
+.page-title:empty:before {
+  display: block;
+  content: 'Untitled';
+  color: grey;
+}
+
+.page-title .icon {
+  color: #3aa3e3;
+}
+

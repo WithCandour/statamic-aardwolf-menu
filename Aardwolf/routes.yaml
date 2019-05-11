@@ -1,0 +1,17 @@
+routes:
+  /:
+    as: aardwolf.index
+    uses: index
+  /create:
+    as: aardwolf.create
+    uses: create
+  post@/create:
+    as: aardwolf.postCreate
+    uses: postCreate
+  /edit/{slug}:
+    as: aardwolf.edit
+    uses: edit
+  post@/edit/{slug}:
+    as: aardwolf.update
+    uses: update
+

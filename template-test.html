@@ -1,0 +1,17 @@
+<ul>
+  {{ aardwolf slug="test" scope="item" }}
+    <li>
+      {{ if item:image }}
+        <img height="50" src="{{ item:image }}" />
+      {{ /if }}
+
+      {{ item:title }}
+
+      {{ if item:children }}
+        <ul>
+          {{*recursive item:children*}}
+        </ul>
+      {{ /if }}
+    </li>
+  {{ /aardwolf }}
+</ul>

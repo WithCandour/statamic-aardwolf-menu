@@ -1,0 +1,7 @@
+sections:
+  main:
+    fields:
+      title:
+        type: text
+      slug:
+        type: text
