@@ -1,52 +1,31 @@
 <template>
-  <div v-if="isExpanded" class="branch-edit card p-0 w-full">
-    <div class="publish-fields">
-      <field
-        type="text"
-        label="Title"
-        description="This item's display name"
-        width="1/2"
-        :value.sync="item.title"
-      ></field>
-
-      <field
-        type="text"
-        label="Item type"
-        description="This item's type (currently unconfigurable)"
-        width="1/2"
-        :value="item.type"
-        :disabled="true"
-      ></field>
-
-      <field
-        type="asset"
-        label="Image"
-        description="This item's featured image (icon)"
-        :value.sync="item.image"
-      ></field>
-
-      <field v-if="item.type === 'page'"
-        type="relate"
-        label="Page"
-        description="Please select this item's page"
-        :value.sync="item.value"
-      ></field>
-
-      <field v-if="item.type === 'collection'"
-        type="relate"
-        relation="collection"
-        label="Entry"
-        description="Please select this item's collection entry"
-        :value.sync="item.value"
-      ></field>
+  <div v-if="isExpanded" class="branch-edit card flush w-full">
+    <div class="card-body">
+      <publish-fields
+          section="main"
+          :fields="fields"
+          :errors="errors"
+          :data.sync="item"
+          :hidden-fields="hiddenFields"
+          :regular-title-field="true"
+      ></publish-fields>
     </div>
   </div>
 </template>
 
 <script>
+  import Conditionals from '../lib/conditionals';
+
   export default {
+    data() {
+      return {
+        errors: {},
+      }
+    },
     props: {
       isExpanded: Boolean,
+      hiddenFields: Array,
+      fields: Array,
       item: Object
     }
   };
@@ -54,6 +33,7 @@
 
 <style>
   .branch-edit {
+    margin-top: -2px;
     margin-left: 24px; /*.w-6*/
     margin-bottom: 8px;
     border-top-left-radius: 0;

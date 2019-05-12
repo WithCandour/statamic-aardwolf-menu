@@ -81,9 +81,6 @@ Vue.component('aardwolfbranch', __webpack_require__(5));
 Vue.component('aardwolfbranchmeta', __webpack_require__(8));
 Vue.component('aardwolfbranchedit', __webpack_require__(11));
 
-// Generic Components
-Vue.component('field', __webpack_require__(19));
-
 /***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -123,6 +120,7 @@ if (false) {(function () {  module.hot.accept()
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_Fieldset__ = __webpack_require__(26);
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 // <template>
@@ -177,7 +175,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //             </div>
 //           </li>
 //
-//           <li class="branch" data-tool="collection">
+//           <li class="branch" data-tool="entry">
 //             <div class="tool">
 //               <span class="icon icon-documents"></span>
 //             </div>
@@ -186,7 +184,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //               <div class="page-move drag-handle w-6 h-full"></div>
 //               <div class="flex items-center flex-1 p-1">
 //                   <div class="page-text">
-//                     New collection
+//                     New entry
 //                   </div>
 //               </div>
 //             </div>
@@ -196,15 +194,17 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //     </div>
 //
 //
-//     <div id="aardwolf-pages" class="page-tree" v-bind:class="{ '--is-hover': isSorting, '--is-saving': isSaving }">
+//     <div id="aardwolf-pages" class="page-tree" :class="{ '--is-sorting': isSorting, '--is-saving': isSaving }">
 //       <ul class="sortable">
-//         <aardwolfbranch v-for="(index, item) in menu.items" :item.sync="item" :index="index" depth="1"></aardwolfbranch>
+//         <aardwolfbranch v-for="(index, item) in menu.items" :content-data.sync="item" :index="index" :fields="fields" :fieldset="fieldset"></aardwolfbranch>
 //       </ul>
 //     </div>
 //   </div>
 // </template>
 //
 // <script>
+
+
 var parents = function parents(el, selector) {
   var tree = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
@@ -244,6 +244,8 @@ var newMenuItem = function newMenuItem(type) {
     return {
       isSorting: false,
       isSaving: false,
+      fieldset: {},
+      fields: [],
       menu: {}
     };
   },
@@ -321,9 +323,13 @@ var newMenuItem = function newMenuItem(type) {
       this.isSaving = true;
       var menu = Object.assign({}, this.menu);
 
-      this.$http.post(cp_url('addons/aardwolf/edit/' + menu.slug), { menu: menu }).success(function (res) {
-        _this2.isSaving = false;
-        if (redirect) window.location.href = res.redirect;
+      this.$http.post(cp_url('addons/aardwolf/edit/' + menu.label), { menu: menu }).success(function (res) {
+        _this2.$dispatch('changesMade', false);
+        if (redirect) {
+          window.location.href = res.redirect;
+        } else {
+          _this2.isSaving = false;
+        }
       });
     }
   },
@@ -334,6 +340,8 @@ var newMenuItem = function newMenuItem(type) {
   },
   ready: function ready() {
     this.menu = Object.assign({}, Statamic.AardwolfMenu);
+    this.fieldset = new __WEBPACK_IMPORTED_MODULE_0__lib_Fieldset__["a" /* default */](Object.assign({}, Statamic.AardwolfMenuFieldset));
+    this.fields = this.fieldset.fields();
 
     // TODO: Either replace this with Vue Custom or a More Vue-like Library
     this.toolbox = new Sortable(document.getElementById('aardwolf-toolbox'), {
@@ -355,7 +363,7 @@ var newMenuItem = function newMenuItem(type) {
 /* 4 */
 /***/ (function(module, exports) {
 
-module.exports = "\n<div>\n  <div class=\"flex flex-wrap items-center w-full sticky\">\n    <h1 class=\"w-full my-1 text-center lg:text-left lg:flex-1\">\n      {{ title }}\n    </h1>\n\n    <div class=\"btn-group btn-group-primary my-1\">\n      <button type=\"button\" class=\"btn btn-primary\" @click.prevent=\"save(true)\">Save</button>\n      <button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n        <span class=\"caret\"></span>\n        <span class=\"sr-only\">Toggle Dropdown</span>\n      </button>\n      <ul class=\"dropdown-menu\">\n        <li>\n          <a id=\"publish-continue\" @click.prevent=\"save(false)\">Save &amp; Continue</a>\n        </li>\n      </ul>\n    </div>\n\n    <div class=\"toolbox w-full\">\n      <ul id=\"aardwolf-toolbox\" class=\"toolbox__tools sortable\">\n        <li class=\"branch\" data-tool=\"section\">\n          <div class=\"tool\">\n            <span class=\"icon icon-folder\"></span>\n          </div>\n\n          <div class=\"branch-row w-full flex\">\n            <div class=\"page-move drag-handle w-6 h-full\"></div>\n            <div class=\"flex items-center flex-1 p-1\">\n                <div class=\"page-text\">\n                  New section\n                </div>\n            </div>\n          </div>\n        </li>\n\n        <li class=\"branch\" data-tool=\"page\">\n          <div class=\"tool\">\n            <span class=\"icon icon-flow-tree\"></span>\n          </div>\n\n          <div class=\"branch-row w-full flex\">\n            <div class=\"page-move drag-handle w-6 h-full\"></div>\n            <div class=\"flex items-center flex-1 p-1\">\n                <div class=\"page-text\">\n                  New page\n                </div>\n            </div>\n          </div>\n        </li>\n\n        <li class=\"branch\" data-tool=\"collection\">\n          <div class=\"tool\">\n            <span class=\"icon icon-documents\"></span>\n          </div>\n\n          <div class=\"branch-row w-full flex\">\n            <div class=\"page-move drag-handle w-6 h-full\"></div>\n            <div class=\"flex items-center flex-1 p-1\">\n                <div class=\"page-text\">\n                  New collection\n                </div>\n            </div>\n          </div>\n        </li>\n      </ul>\n    </div>\n  </div>\n\n\n  <div id=\"aardwolf-pages\" class=\"page-tree\" v-bind:class=\"{ '--is-hover': isSorting, '--is-saving': isSaving }\">\n    <ul class=\"sortable\">\n      <aardwolfbranch v-for=\"(index, item) in menu.items\" :item.sync=\"item\" :index=\"index\" depth=\"1\"></aardwolfbranch>\n    </ul>\n  </div>\n</div>\n";
+module.exports = "\n<div>\n  <div class=\"flex flex-wrap items-center w-full sticky\">\n    <h1 class=\"w-full my-1 text-center lg:text-left lg:flex-1\">\n      {{ title }}\n    </h1>\n\n    <div class=\"btn-group btn-group-primary my-1\">\n      <button type=\"button\" class=\"btn btn-primary\" @click.prevent=\"save(true)\">Save</button>\n      <button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">\n        <span class=\"caret\"></span>\n        <span class=\"sr-only\">Toggle Dropdown</span>\n      </button>\n      <ul class=\"dropdown-menu\">\n        <li>\n          <a id=\"publish-continue\" @click.prevent=\"save(false)\">Save &amp; Continue</a>\n        </li>\n      </ul>\n    </div>\n\n    <div class=\"toolbox w-full\">\n      <ul id=\"aardwolf-toolbox\" class=\"toolbox__tools sortable\">\n        <li class=\"branch\" data-tool=\"section\">\n          <div class=\"tool\">\n            <span class=\"icon icon-folder\"></span>\n          </div>\n\n          <div class=\"branch-row w-full flex\">\n            <div class=\"page-move drag-handle w-6 h-full\"></div>\n            <div class=\"flex items-center flex-1 p-1\">\n                <div class=\"page-text\">\n                  New section\n                </div>\n            </div>\n          </div>\n        </li>\n\n        <li class=\"branch\" data-tool=\"page\">\n          <div class=\"tool\">\n            <span class=\"icon icon-flow-tree\"></span>\n          </div>\n\n          <div class=\"branch-row w-full flex\">\n            <div class=\"page-move drag-handle w-6 h-full\"></div>\n            <div class=\"flex items-center flex-1 p-1\">\n                <div class=\"page-text\">\n                  New page\n                </div>\n            </div>\n          </div>\n        </li>\n\n        <li class=\"branch\" data-tool=\"entry\">\n          <div class=\"tool\">\n            <span class=\"icon icon-documents\"></span>\n          </div>\n\n          <div class=\"branch-row w-full flex\">\n            <div class=\"page-move drag-handle w-6 h-full\"></div>\n            <div class=\"flex items-center flex-1 p-1\">\n                <div class=\"page-text\">\n                  New entry\n                </div>\n            </div>\n          </div>\n        </li>\n      </ul>\n    </div>\n  </div>\n\n\n  <div id=\"aardwolf-pages\" class=\"page-tree\" :class=\"{ '--is-sorting': isSorting, '--is-saving': isSaving }\">\n    <ul class=\"sortable\">\n      <aardwolfbranch v-for=\"(index, item) in menu.items\" :content-data.sync=\"item\" :index=\"index\" :fields=\"fields\" :fieldset=\"fieldset\"></aardwolfbranch>\n    </ul>\n  </div>\n</div>\n";
 
 /***/ }),
 /* 5 */
@@ -363,6 +371,7 @@ module.exports = "\n<div>\n  <div class=\"flex flex-wrap items-center w-full sti
 
 var __vue_script__, __vue_template__
 var __vue_styles__ = {}
+__webpack_require__(29)
 __vue_script__ = __webpack_require__(6)
 if (Object.keys(__vue_script__).some(function (key) { return key !== "default" && key !== "__esModule" })) {
   console.warn("[vue-loader] resources/src/js/components/branch.vue: named exports in *.vue files are ignored.")}
@@ -396,8 +405,9 @@ if (false) {(function () {  module.hot.accept()
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_conditionals__ = __webpack_require__(27);
 // <template>
-//   <li class="branch depth-{{ depth }}">
+//   <li class="branch brand-depth__{{ depth }}" :class="{ 'branch--is-open': isExpanded }">
 //     <div class="branch-row w-full flex">
 //       <div class="page-move drag-handle w-6 h-full"></div>
 //
@@ -406,25 +416,30 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //         @toggle-open="toggleOpen"
 //         :is-open="isOpen"
 //         :has-children="hasChildren"
-//         :item.sync="item"
+//         :item.sync="contentData"
 //       ></aardwolfbranchmeta>
 //     </div>
 //
 //     <aardwolfbranchedit
 //         :is-expanded="isExpanded"
-//         :item.sync="item"
+//         :fields="fields"
+//         :item.sync="contentData"
+//         :hidden-fields="hiddenFields"
 //       ></aardwolfbranchedit>
 //
 //     <div class="page-tree w-full">
 //       <ul v-show="isOpen" class="sortable branches" :data-parent-index="index">
-//         <aardwolfbranch v-for="(i, item) in item.children" :item.sync="item" :index="i" :depth="depth + 1"></aardwolfbranch>
+//         <aardwolfbranch v-for="(i, item) in contentData.children" :content-data.sync="item" :index="i" :depth="depth + 1" :fields="fields" :fieldset="fieldset"></aardwolfbranch>
 //       </ul>
 //     </div>
 //   </li>
 // </template>
 //
 // <script>
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
+  mixins: [__WEBPACK_IMPORTED_MODULE_0__lib_conditionals__["a" /* default */]],
   data: function data() {
     return {
       isExpanded: false,
@@ -447,20 +462,35 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
   },
   props: {
     index: Number,
-    depth: Number,
-    item: {
-      title: String,
-      children: Array
-    }
+    fields: Array,
+    fieldset: Object,
+    depth: {
+      type: Number,
+      default: 1
+    },
+    contentData: Object
+  },
+  ready: function ready() {
+    this.initConditions();
   }
 });
 // </script>
+//
+// <style>
+//   .branch.branch--is-open .branch-meta {
+//     background-color: #fafcff;
+//   }
+//
+//   .branch.branch--is-open .branch-row {
+//     border-bottom-right-radius: 0;
+//   }
+// </style>
 
 /***/ }),
 /* 7 */
 /***/ (function(module, exports) {
 
-module.exports = "\n<li class=\"branch depth-{{ depth }}\">\n  <div class=\"branch-row w-full flex\">\n    <div class=\"page-move drag-handle w-6 h-full\"></div>\n\n    <aardwolfbranchmeta\n      @toggle-expanded=\"toggleExpanded\"\n      @toggle-open=\"toggleOpen\"\n      :is-open=\"isOpen\"\n      :has-children=\"hasChildren\"\n      :item.sync=\"item\"\n    ></aardwolfbranchmeta>\n  </div>\n\n  <aardwolfbranchedit\n      :is-expanded=\"isExpanded\"\n      :item.sync=\"item\"\n    ></aardwolfbranchedit>\n\n  <div class=\"page-tree w-full\">\n    <ul v-show=\"isOpen\" class=\"sortable branches\" :data-parent-index=\"index\">\n      <aardwolfbranch v-for=\"(i, item) in item.children\" :item.sync=\"item\" :index=\"i\" :depth=\"depth + 1\"></aardwolfbranch>\n    </ul>\n  </div>\n</li>\n";
+module.exports = "\n<li class=\"branch brand-depth__{{ depth }}\" :class=\"{ 'branch--is-open': isExpanded }\">\n  <div class=\"branch-row w-full flex\">\n    <div class=\"page-move drag-handle w-6 h-full\"></div>\n\n    <aardwolfbranchmeta\n      @toggle-expanded=\"toggleExpanded\"\n      @toggle-open=\"toggleOpen\"\n      :is-open=\"isOpen\"\n      :has-children=\"hasChildren\"\n      :item.sync=\"contentData\"\n    ></aardwolfbranchmeta>\n  </div>\n\n  <aardwolfbranchedit\n      :is-expanded=\"isExpanded\"\n      :fields=\"fields\"\n      :item.sync=\"contentData\"\n      :hidden-fields=\"hiddenFields\"\n    ></aardwolfbranchedit>\n\n  <div class=\"page-tree w-full\">\n    <ul v-show=\"isOpen\" class=\"sortable branches\" :data-parent-index=\"index\">\n      <aardwolfbranch v-for=\"(i, item) in contentData.children\" :content-data.sync=\"item\" :index=\"i\" :depth=\"depth + 1\" :fields=\"fields\" :fieldset=\"fieldset\"></aardwolfbranch>\n    </ul>\n  </div>\n</li>\n";
 
 /***/ }),
 /* 8 */
@@ -530,7 +560,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       var icons = {
         'section': 'icon-folder',
         'page': 'icon-flow-tree',
-        'collection': 'icon-documents'
+        'entry': 'icon-documents'
       };
 
       return icons[this.item.type] ? icons[this.item.type] : null;
@@ -541,7 +571,6 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
       this.$emit('toggle-expanded');
     },
     toggleOpen: function toggleOpen() {
-      console.log(this.isOpen);
       this.$emit('toggle-open');
     }
   }
@@ -624,7 +653,7 @@ exports = module.exports = __webpack_require__(14)(false);
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.branch-edit {\n  margin-left: 24px; /*.w-6*/\n  margin-bottom: 8px;\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.branch-edit {\n  margin-top: -2px;\n  margin-left: 24px; /*.w-6*/\n  margin-bottom: 8px;\n  border-top-left-radius: 0;\n  border-top-right-radius: 0;\n}\n", ""]);
 
 // exports
 
@@ -984,55 +1013,36 @@ function listToStyles (parentId, list) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__lib_conditionals__ = __webpack_require__(27);
 // <template>
-//   <div v-if="isExpanded" class="branch-edit card p-0 w-full">
-//     <div class="publish-fields">
-//       <field
-//         type="text"
-//         label="Title"
-//         description="This item's display name"
-//         width="1/2"
-//         :value.sync="item.title"
-//       ></field>
-//
-//       <field
-//         type="text"
-//         label="Item type"
-//         description="This item's type (currently unconfigurable)"
-//         width="1/2"
-//         :value="item.type"
-//         :disabled="true"
-//       ></field>
-//
-//       <field
-//         type="asset"
-//         label="Image"
-//         description="This item's featured image (icon)"
-//         :value.sync="item.image"
-//       ></field>
-//
-//       <field v-if="item.type === 'page'"
-//         type="relate"
-//         label="Page"
-//         description="Please select this item's page"
-//         :value.sync="item.value"
-//       ></field>
-//
-//       <field v-if="item.type === 'collection'"
-//         type="relate"
-//         relation="collection"
-//         label="Entry"
-//         description="Please select this item's collection entry"
-//         :value.sync="item.value"
-//       ></field>
+//   <div v-if="isExpanded" class="branch-edit card flush w-full">
+//     <div class="card-body">
+//       <publish-fields
+//           section="main"
+//           :fields="fields"
+//           :errors="errors"
+//           :data.sync="item"
+//           :hidden-fields="hiddenFields"
+//           :regular-title-field="true"
+//       ></publish-fields>
 //     </div>
 //   </div>
 // </template>
 //
 // <script>
+
+
 /* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      errors: {}
+    };
+  },
+
   props: {
     isExpanded: Boolean,
+    hiddenFields: Array,
+    fields: Array,
     item: Object
   }
 });
@@ -1040,6 +1050,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 // <style>
 //   .branch-edit {
+//     margin-top: -2px;
 //     margin-left: 24px; /*.w-6*/
 //     margin-bottom: 8px;
 //     border-top-left-radius: 0;
@@ -1051,180 +1062,423 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* 18 */
 /***/ (function(module, exports) {
 
-module.exports = "\n<div v-if=\"isExpanded\" class=\"branch-edit card p-0 w-full\">\n  <div class=\"publish-fields\">\n    <field\n      type=\"text\"\n      label=\"Title\"\n      description=\"This item's display name\"\n      width=\"1/2\"\n      :value.sync=\"item.title\"\n    ></field>\n\n    <field\n      type=\"text\"\n      label=\"Item type\"\n      description=\"This item's type (currently unconfigurable)\"\n      width=\"1/2\"\n      :value=\"item.type\"\n      :disabled=\"true\"\n    ></field>\n\n    <field\n      type=\"asset\"\n      label=\"Image\"\n      description=\"This item's featured image (icon)\"\n      :value.sync=\"item.image\"\n    ></field>\n\n    <field v-if=\"item.type === 'page'\"\n      type=\"relate\"\n      label=\"Page\"\n      description=\"Please select this item's page\"\n      :value.sync=\"item.value\"\n    ></field>\n\n    <field v-if=\"item.type === 'collection'\"\n      type=\"relate\"\n      relation=\"collection\"\n      label=\"Entry\"\n      description=\"Please select this item's collection entry\"\n      :value.sync=\"item.value\"\n    ></field>\n  </div>\n</div>\n";
+module.exports = "\n<div v-if=\"isExpanded\" class=\"branch-edit card flush w-full\">\n  <div class=\"card-body\">\n    <publish-fields\n        section=\"main\"\n        :fields=\"fields\"\n        :errors=\"errors\"\n        :data.sync=\"item\"\n        :hidden-fields=\"hiddenFields\"\n        :regular-title-field=\"true\"\n    ></publish-fields>\n  </div>\n</div>\n";
 
 /***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __vue_script__, __vue_template__
-var __vue_styles__ = {}
-__vue_script__ = __webpack_require__(20)
-if (Object.keys(__vue_script__).some(function (key) { return key !== "default" && key !== "__esModule" })) {
-  console.warn("[vue-loader] resources/src/js/components/field.vue: named exports in *.vue files are ignored.")}
-__vue_template__ = __webpack_require__(21)
-module.exports = __vue_script__ || {}
-if (module.exports.__esModule) module.exports = module.exports.default
-var __vue_options__ = typeof module.exports === "function" ? (module.exports.options || (module.exports.options = {})) : module.exports
-if (__vue_template__) {
-__vue_options__.template = __vue_template__
-}
-if (!__vue_options__.computed) __vue_options__.computed = {}
-Object.keys(__vue_styles__).forEach(function (key) {
-var module = __vue_styles__[key]
-__vue_options__.computed[key] = function () { return module }
-})
-if (false) {(function () {  module.hot.accept()
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), false)
-  if (!hotAPI.compatible) return
-  var id = "_v-23ac927d/field.vue"
-  if (!module.hot.data) {
-    hotAPI.createRecord(id, module.exports)
-  } else {
-    hotAPI.update(id, module.exports, __vue_template__)
-  }
-})()}
-
-/***/ }),
-/* 20 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-// <template>
-//   <div class="form-group w-{{ width }}">
-//     <div class="field-inner">
-//       <label class="block">{{ label }}</label>
-//       <small v-show="description" class="help-block">
-//         <p>{{ description }}</p>
-//       </small>
-//
-//       <!-- Text Input -->
-//       <input v-if="type === 'text'"
-//         type="text"
-//         class="form-control type-text"
-//         v-model="value"
-//         :disabled="disabled"
-//       />
-//
-//       <!-- Relate Type -->
-//       <relate-fieldtype v-if="(relateLoaded && type === 'relate')"
-//         :config="relateConfig"
-//         :data.sync="relate"
-//       ></relate-fieldtype>
-//
-//       <!-- Asset Type -->
-//       <assets-fieldtype v-if="type === 'asset'"
-//         v-ref:assets
-//         :config="assetConfig"
-//         :data.sync="relate"
-//       ></assets-fieldtype>
-//     </div>
-//   </div>
-// </template>
-//
-// <script>
-/* harmony default export */ __webpack_exports__["default"] = ({
-  data: function data() {
-    return {
-      'relate': [],
-      'relateLoaded': false,
-      'relateConfig': {
-        type: this.relation,
-        name: 'value',
-        max_items: 1
-      },
-      'assetConfig': {
-        'container': 'main',
-        'folder': '/',
-        'restrict': false,
-        'type': 'assets',
-        'name': 'value'
-      }
-    };
-  },
-
-  props: {
-    disabled: {
-      type: Boolean,
-      default: false
-    },
-    type: {
-      type: String,
-      default: 'text'
-    },
-    width: {
-      type: String,
-      default: 'full'
-    },
-    label: {
-      type: String,
-      default: 'Unlabelled field'
-    },
-    relation: {
-      type: String,
-      default: 'pages'
-    },
-    description: String,
-    value: String
-  },
-  ready: function ready() {
-    if (this.type === 'relate') {
-      switch (this.relation) {
-        case 'pages':
-          this.relate.push(this.value);
-          this.relateLoaded = true;
-          break;
-
-        case 'collection':
-          var prefetched = data_get(Statamic, 'Publish.suggestions.type.collections');
-          if (prefetched) {
-            this.relate.push(this.value);
-            this.relateConfig.collection = prefetched.map(function (c) {
-              return c.value;
-            });
-            this.relateLoaded = true;
-          } else {
-            this.$http.post(cp_url('addons/suggest/suggestions'), { type: 'collections' }, function (data) {
-              this.relate.push(this.value);
-              this.relateConfig.collection = data.map(function (c) {
-                return c.value;
-              });
-              this.relateLoaded = true;
-            });
-          }
-          break;
-      }
-    }
-
-    if (this.type === 'asset') {
-      this.$refs.assets.loadAssets([this.value]);
-    }
-
-    this.$watch('relate', function (relate) {
-      if (relate == null) return;
-      if (!relate[0]) return;
-
-      this.value = relate[0];
-    });
-  }
-});
-// </script>
-//
-// <style></style>
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports) {
-
-module.exports = "\n<div class=\"form-group w-{{ width }}\">\n  <div class=\"field-inner\">\n    <label class=\"block\">{{ label }}</label>\n    <small v-show=\"description\" class=\"help-block\">\n      <p>{{ description }}</p>\n    </small>\n\n    <!-- Text Input -->\n    <input v-if=\"type === 'text'\"\n      type=\"text\"\n      class=\"form-control type-text\"\n      v-model=\"value\"\n      :disabled=\"disabled\"\n    />\n\n    <!-- Relate Type -->\n    <relate-fieldtype v-if=\"(relateLoaded && type === 'relate')\"\n      :config=\"relateConfig\"\n      :data.sync=\"relate\"\n    ></relate-fieldtype>\n\n    <!-- Asset Type -->\n    <assets-fieldtype v-if=\"type === 'asset'\"\n      v-ref:assets\n      :config=\"assetConfig\"\n      :data.sync=\"relate\"\n    ></assets-fieldtype>\n  </div>\n</div>\n";
-
-/***/ }),
+/* 19 */,
+/* 20 */,
+/* 21 */,
 /* 22 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 23 */,
+/* 24 */,
+/* 25 */,
+/* 26 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/** Fieldset parser present at "/statamic/resources/js/components/publish/Fieldset.js" */
+var Fieldset = function () {
+    function Fieldset(fieldset) {
+        _classCallCheck(this, Fieldset);
+
+        this.fieldset = fieldset;
+        this.name = fieldset.name;
+        this.sections = this.parseSections(fieldset.sections);
+        this.metaFields = [];
+    }
+
+    _createClass(Fieldset, [{
+        key: 'parseSections',
+        value: function parseSections(sections) {
+            var _this = this;
+
+            return _.chain(sections).mapObject(function (section, handle) {
+                section.handle = handle;
+                section.fields = _this.parseFields(section.fields);
+                return section;
+            }).values().value();
+        }
+    }, {
+        key: 'parseFields',
+        value: function parseFields(fields) {
+            return _.chain(fields).mapObject(function (config, handle) {
+                config.name = handle;
+                return config;
+            }).values().value();
+        }
+
+        /**
+         * By default, the slug field won't be shown.
+         * This lets you specify whether or not it should be shown.
+         */
+
+    }, {
+        key: 'showSlug',
+        value: function showSlug(show) {
+            if (show) this.metaFields.push('slug');
+            return this;
+        }
+
+        /**
+         * By default, the date field won't be shown.
+         * This lets you specify whether or not it should be shown.
+         */
+
+    }, {
+        key: 'showDate',
+        value: function showDate(show) {
+            if (show) this.metaFields.push('date');
+            return this;
+        }
+
+        /**
+         * Place a title field at the beginning of the first section
+         * if it hasn't been explicitly placed somewhere else.
+         */
+
+    }, {
+        key: 'prependTitle',
+        value: function prependTitle() {
+            if (!this.fieldsInSections().includes('title')) {
+                this.firstSectionFields().unshift({
+                    name: 'title',
+                    type: 'text',
+                    instructions: null,
+                    width: 100
+                });
+            }
+
+            return this;
+        }
+
+        /**
+         * Prepend any required meta fields to the start of the sidebar.
+         */
+
+    }, {
+        key: 'prependMeta',
+        value: function prependMeta() {
+            var _this2 = this;
+
+            this.ensureSidebar();
+
+            var fields = this.fieldsInSections();
+
+            _.each(this.metaFields, function (field) {
+                if (!fields.includes(field)) {
+                    _this2.pushSidebarField({ name: field, type: field });
+                }
+            });
+
+            this.removeEmptySidebar();
+
+            return this;
+        }
+
+        /**
+         * Push a field into the sidebar
+         */
+
+    }, {
+        key: 'pushSidebarField',
+        value: function pushSidebarField(config) {
+            var sidebar = this.sidebarSectionFields();
+
+            var field = Object.assign({
+                isMeta: true,
+                width: 100,
+                localizable: true
+            }, config || {});
+
+            sidebar.unshift(field);
+        }
+
+        /**
+         * Customizing the sidebar is not a requirement, but we expect one to
+         * exist. If it's not already defined, we'll create a blank one here.
+         */
+
+    }, {
+        key: 'ensureSidebar',
+        value: function ensureSidebar() {
+            var sidebar = _.find(this.sections, { handle: 'sidebar' });
+
+            if (!sidebar) {
+                this.sections.push({ handle: 'sidebar', display: translate('cp.meta'), fields: [] });
+            }
+        }
+
+        /**
+         * It's possible that all the fields that would normally be in the
+         * sidebar have been placed in other sections, resulting in an
+         * empty sidebar. If it's empty, we'll just get rid of it.
+         */
+
+    }, {
+        key: 'removeEmptySidebar',
+        value: function removeEmptySidebar() {
+            if (this.sidebarSectionFields().length > 0) return;
+
+            this.sections = _.reject(this.sections, function (section) {
+                return section.handle == 'sidebar';
+            });
+        }
+
+        /**
+         * Get the names of fields that have been placed into a section.
+         */
+
+    }, {
+        key: 'fieldsInSections',
+        value: function fieldsInSections() {
+            return _.chain(this.sections).map(function (section) {
+                return section.fields;
+            }).flatten().pluck('name').value();
+        }
+
+        /**
+         * Get the fields that are in the first section.
+         */
+
+    }, {
+        key: 'firstSectionFields',
+        value: function firstSectionFields() {
+            return this.sections[0].fields;
+        }
+
+        /**
+         * Get the fields that are in the sidebar.
+         */
+
+    }, {
+        key: 'sidebarSectionFields',
+        value: function sidebarSectionFields() {
+            return _.find(this.sections, { handle: 'sidebar' }).fields;
+        }
+
+        /**
+         * Get all the fields from all the sections.
+         */
+
+    }, {
+        key: 'fields',
+        value: function fields() {
+            return _.chain(this.sections).pluck('fields').flatten().value();
+        }
+    }]);
+
+    return Fieldset;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (Fieldset);
+
+/***/ }),
+/* 27 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Condition_js__ = __webpack_require__(28);
+/** Conditionals Mixins present at "/statamic/resources/js/components/publish/conditionals.js" */
+
+
+/* harmony default export */ __webpack_exports__["a"] = ({
+    data: function data() {
+        return {
+            conditions: [],
+            hiddenFields: []
+        };
+    },
+
+    methods: {
+        evaluateConditions: function evaluateConditions() {
+            var _this = this;
+
+            this.conditions.forEach(function (condition) {
+                condition.passes = condition.validate(_this.contentData);
+            });
+
+            this.hiddenFields = _.chain(this.fieldset.fields()).filter(function (field) {
+                return !_this.isVisible(field);
+            }).map(function (field) {
+                return field.name;
+            }).value();
+        },
+
+
+        isVisible: function isVisible(field) {
+            var condition = this.conditions.find(function (condition) {
+                return condition.id === field.name;
+            });
+
+            if (condition === undefined) {
+                return true;
+            }
+
+            if (field.hide_when !== undefined) {
+                return !condition.passes;
+            }
+
+            return condition.passes;
+        },
+
+        initConditions: function initConditions() {
+            var _this2 = this;
+
+            this.conditions = this.fieldset.fields().filter(function (field) {
+                return field.show_when !== undefined || field.hide_when !== undefined;
+            }).map(function (field) {
+                return new __WEBPACK_IMPORTED_MODULE_0__Condition_js__["a" /* default */](field.name, _this2.condition(field));
+            });
+
+            this.evaluateConditions();
+
+            this.$watch('contentData', function (data) {
+                return _this2.evaluateConditions(data);
+            }, { deep: true });
+        },
+
+        condition: function condition(field) {
+            if (field.show_when !== undefined) {
+                return field.show_when;
+            }
+
+            return field.hide_when;
+        }
+    }
+});
+
+/***/ }),
+/* 28 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/** Condition class at "/statamic/resources/js/components/publish/Condition.js" */
+var Condition = function () {
+    function Condition(id, rule) {
+        _classCallCheck(this, Condition);
+
+        this.id = id;
+        this.rule = rule;
+        this.passes = false;
+        this.validate = this._validate();
+    }
+
+    _createClass(Condition, [{
+        key: 'isJavascript',
+        value: function isJavascript() {
+            return typeof this.rule === 'string';
+        }
+    }, {
+        key: 'exists',
+        value: function exists() {
+            if (!Statamic.conditions) return false;
+
+            return Statamic.conditions.hasOwnProperty(this.rule);
+        }
+    }, {
+        key: '_validate',
+        value: function _validate() {
+            if (this.isJavascript() && !this.exists()) {
+                console.error('Statamic.conditions.' + this.rule + ' hasn\'t been implemented.');
+                return function () {
+                    return false;
+                };
+            }
+
+            if (this.isJavascript() && this.exists()) {
+                return Statamic.conditions[this.rule];
+            }
+
+            return function (data) {
+                var passes = [];
+
+                var ors = Object.keys(this.rule).filter(function (key) {
+                    return key.startsWith('or_');
+                });
+
+                for (var field in this.rule) {
+                    if (ors.includes(field)) {
+                        var trimmed = field.substr(3);
+
+                        if (data[trimmed] === this.rule[field]) {
+                            return true;
+                        }
+                    }
+
+                    if (!ors.includes(field) && Array.isArray(this.rule[field])) {
+                        passes.push(this.rule[field].includes(data[field]));
+                    } else {
+                        if (this.rule[field] === 'not null') {
+                            passes.push(data[field] !== null);
+                        } else {
+                            passes.push(data[field] === this.rule[field]);
+                        }
+                    }
+                }
+
+                return !passes.includes(false);
+            };
+        }
+    }]);
+
+    return Condition;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (Condition);
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(30);
+if(typeof content === 'string') content = [[module.i, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = __webpack_require__(15).default
+var update = add("60f758ff", content, false, {});
+// Hot Module Replacement
+if(false) {
+ // When the styles change, update the <style> tags
+ if(!content.locals) {
+   module.hot.accept("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-rewriter.js!../../../../node_modules/vue-loader/lib/selector.js?type=style&index=0!./branch.vue", function() {
+     var newContent = require("!!../../../../node_modules/css-loader/index.js!../../../../node_modules/vue-loader/lib/style-rewriter.js!../../../../node_modules/vue-loader/lib/selector.js?type=style&index=0!./branch.vue");
+     if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+     update(newContent);
+   });
+ }
+ // When the module is disposed, remove the <style> tags
+ module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(14)(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.branch.branch--is-open .branch-meta {\n  background-color: #fafcff;\n}\n\n.branch.branch--is-open .branch-row {\n  border-bottom-right-radius: 0;\n}\n", ""]);
+
+// exports
+
 
 /***/ })
 /******/ ]);

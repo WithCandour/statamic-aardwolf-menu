@@ -30,9 +30,8 @@
   display: none !important;
 }
 
-#aardwolf-pages.\--is-hover ul.sortable {
-  padding-bottom: 8px;
-  background-color: rgba(58, 163, 227, 0.4);
+#aardwolf-pages.\--is-sorting ul.sortable {
+  padding-bottom: 16px;
 }
 
 #aardwolf-pages.\--is-saving {

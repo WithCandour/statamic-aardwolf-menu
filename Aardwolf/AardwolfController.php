@@ -36,7 +36,10 @@ class AardwolfController extends Controller
             return YAML::parse(File::get($path));
         });
 
-        return $this->view('index', [ 'menus' => $menus ]);
+        return $this->view('index', [
+            'title' => trans('addons.Aardwolf::titles.index'),
+            'menus' => $menus
+        ]);
     }
 
     /**
@@ -70,15 +73,15 @@ class AardwolfController extends Controller
         $data = $this->processFields($this->fieldset(), $request->fields);
 
         // Generate a slug if there isn't one defined
-        if (empty($data['slug'])) {
-            $data['slug'] = str_slug($data['title']);
+        if (empty($data['label'])) {
+            $data['label'] = str_slug($data['title']);
         }
 
         // Adds the default items array to the $data
         $data['items'] = [];
 
         // Generate the potential path for this menu
-        $path = self::storage_path . $data['slug'];
+        $path = self::storage_path . $data['label'];
 
         // Check whether it already exists (duplicate)
         if (File::exists($path)) {
@@ -95,7 +98,7 @@ class AardwolfController extends Controller
         return [
             'success' => true,
             'message' => trans('cp.saved_success'),
-            'redirect' => route('aardwolf.index')
+            'redirect' => route('aardwolf.edit', [ 'label' => $data['label'] ])
         ];
     }
 
@@ -115,8 +118,16 @@ class AardwolfController extends Controller
             return redirect()->route('aardwolf.index');
         }
 
+        $menu = YAML::parse(File::get($path));
+        $fieldset = Fieldset::create(
+            'item',
+            YAML::parse(File::get($this->getDirectory().'/resources/fieldsets/item.yaml'))
+        );
+
         return $this->view('edit', [
-            'menu' => YAML::parse(File::get($path))
+            'title' => trans('addons.Aardwolf::titles.edit', [ 'title' => $menu['title'] ]),
+            'fieldset' => $fieldset->toPublishArray(),
+            'menu' => $menu
         ]);
     }
 
@@ -150,6 +161,11 @@ class AardwolfController extends Controller
      */
     public function delete(string $slug)
     {
-        return $this->view('delete');
+        $path = self::storage_path . $slug;
+
+        // Delete it
+        File::delete($path);
+
+        return redirect(route('aardwolf.index'));
     }
 }

@@ -50,7 +50,7 @@
             </div>
           </li>
 
-          <li class="branch" data-tool="collection">
+          <li class="branch" data-tool="entry">
             <div class="tool">
               <span class="icon icon-documents"></span>
             </div>
@@ -59,7 +59,7 @@
               <div class="page-move drag-handle w-6 h-full"></div>
               <div class="flex items-center flex-1 p-1">
                   <div class="page-text">
-                    New collection
+                    New entry
                   </div>
               </div>
             </div>
@@ -69,15 +69,17 @@
     </div>
 
 
-    <div id="aardwolf-pages" class="page-tree" v-bind:class="{ '--is-hover': isSorting, '--is-saving': isSaving }">
+    <div id="aardwolf-pages" class="page-tree" :class="{ '--is-sorting': isSorting, '--is-saving': isSaving }">
       <ul class="sortable">
-        <aardwolfbranch v-for="(index, item) in menu.items" :item.sync="item" :index="index" depth="1"></aardwolfbranch>
+        <aardwolfbranch v-for="(index, item) in menu.items" :content-data.sync="item" :index="index" :fields="fields" :fieldset="fieldset"></aardwolfbranch>
       </ul>
     </div>
   </div>
 </template>
 
 <script>
+  import Fieldset from '../lib/Fieldset';
+
   const parents = (el, selector, tree = []) => {
     if (!el) return tree;
     if (el.matches(selector)) tree.push(el);
@@ -116,6 +118,8 @@
       return {
         isSorting: false,
         isSaving: false,
+        fieldset: {},
+        fields: [],
         menu: {}
       }
     },
@@ -186,9 +190,13 @@
           this.isSaving = true;
           let menu = Object.assign({}, this.menu);
 
-          this.$http.post(cp_url(`addons/aardwolf/edit/${ menu.slug }`), { menu }).success(res => {
-            this.isSaving = false;
-            if (redirect) window.location.href = res.redirect;
+          this.$http.post(cp_url(`addons/aardwolf/edit/${ menu.label }`), { menu }).success(res => {
+            this.$dispatch('changesMade', false);
+            if (redirect) {
+              window.location.href = res.redirect;
+            } else {
+              this.isSaving = false;
+            }
           });
         }
     },
@@ -199,6 +207,8 @@
     },
     ready() {
       this.menu = Object.assign({}, Statamic.AardwolfMenu);
+      this.fieldset = new Fieldset(Object.assign({}, Statamic.AardwolfMenuFieldset));
+      this.fields = this.fieldset.fields();
 
       // TODO: Either replace this with Vue Custom or a More Vue-like Library
       this.toolbox = new Sortable(document.getElementById('aardwolf-toolbox'), {

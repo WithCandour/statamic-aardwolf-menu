@@ -9,18 +9,12 @@
     @include('Aardwolf::partials.nav')
   </div>
 
-  <div class="card">
     @if(count($menus) === 0)
-      <h3>You haven't created any menu's yet</h3>
+      <div class="card">
+        <h3>You haven't created any menu's yet</h3>
+      </div>
     @else
-      <ul>
-        @foreach($menus as $menu)
-          <li>
-            <a href="{{ route('aardwolf.edit', [ 'slug' => $menu['slug'] ]) }}">
-              {{ $menu['title'] }}
-            </a>
-          </li>
-        @endforeach
+      @include('Aardwolf::partials.menu-table')
     @endif
   </div>
 @endsection

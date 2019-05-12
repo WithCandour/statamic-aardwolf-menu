@@ -27,7 +27,7 @@
         let icons = {
           'section': 'icon-folder',
           'page': 'icon-flow-tree',
-          'collection': 'icon-documents'
+          'entry': 'icon-documents'
         }
 
         return icons[this.item.type] ? icons[this.item.type] : null;
@@ -38,7 +38,6 @@
         this.$emit('toggle-expanded');
       },
       toggleOpen() {
-        console.log(this.isOpen);
         this.$emit('toggle-open');
       }
     }

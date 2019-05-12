@@ -1,0 +1,48 @@
+sections:
+  main:
+    fields:
+      page_header:
+        type: section
+        display: Configure this Page item
+        instructions: Configure this page menu item, fields defined here will be available within the `{{ aardwolf }}` tag
+        show_when:
+          type: page
+      section_header:
+        type: section
+        display: Configure this Section item
+        instructions: Sections can act as plain submenu's (when no link is required)
+        show_when:
+          type: section
+      section_entry:
+        type: section
+        display: Configure this Entry item
+        instructions: Configure this entry menu item, fields defined here will be available within the `{{ aardwolf }}` tag
+        show_when:
+          type: entry
+      image:
+        type: assets
+        container: main
+        folder: /
+        restrict: false
+        max_files: 1
+        mode: grid
+        width: 33
+      title:
+        type: text
+        width: 66
+      classes:
+        display: Custom Classes
+        instructions: Define additional custom classes to add to this item
+        type: tags
+      page:
+        type: pages
+        show_when:
+          type: page
+      entry:
+        type: collection
+        show_when:
+          type: entry
+      type:
+        type: hidden
+      children:
+        type: hidden

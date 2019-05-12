@@ -14,4 +14,7 @@ routes:
   post@/edit/{slug}:
     as: aardwolf.update
     uses: update
+  /delete/{slug}:
+    as: aardwolf.delete
+    uses: delete
 

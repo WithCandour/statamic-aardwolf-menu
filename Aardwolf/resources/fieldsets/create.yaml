@@ -3,5 +3,6 @@ sections:
     fields:
       title:
         type: text
-      slug:
+      label:
         type: text
+        autoslug: title
