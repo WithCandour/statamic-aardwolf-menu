@@ -17,12 +17,40 @@ class AardwolfController extends Controller
 
     const storage_path = 'site/storage/addons/Aardwolf/';
 
-    private function fieldset()
+    private function getStoragePath($label = null)
+    {
+        return is_null($label)
+            ? self::storage_path
+            : self::storage_path . $label . '.yaml';
+    }
+
+    private function menuFieldset()
     {
         return Fieldset::create(
             'create',
             YAML::parse(File::get($this->getDirectory().'/resources/fieldsets/create.yaml'))
         );
+    }
+
+    private function itemFieldset()
+    {
+        $slug = $this->getConfig('fieldset', null);
+        $fieldset = null;
+
+        if ($slug !== null) {
+            $fieldset = Fieldset::get($slug);
+        }
+
+        return $fieldset;
+    }
+
+    private function getMenuList()
+    {
+        $files = Storage::files($this->getStoragePath());
+
+        return collect($files)->map(function($path) {
+            return YAML::parse(File::get($path));
+        });
     }
 
     /**
@@ -32,9 +60,7 @@ class AardwolfController extends Controller
      */
     public function index() : View
     {
-        $menus = collect(Storage::files(self::storage_path))->map(function($path) {
-            return YAML::parse(File::get($path));
-        });
+        $menus = $this->getMenuList();
 
         return $this->view('index', [
             'title' => trans('addons.Aardwolf::titles.index'),
@@ -49,7 +75,7 @@ class AardwolfController extends Controller
      */
     public function create() : View
     {
-        $fieldset = $this->fieldset();
+        $fieldset = $this->menuFieldset();
 
         return $this->view('create', [
             'title' => trans('addons.Aardwolf::titles.create'),
@@ -70,7 +96,7 @@ class AardwolfController extends Controller
      */
     public function postCreate(Request $request)
     {
-        $data = $this->processFields($this->fieldset(), $request->fields);
+        $data = $this->processFields($this->menuFieldset(), $request->fields);
 
         // Generate a slug if there isn't one defined
         if (empty($data['label'])) {
@@ -81,7 +107,7 @@ class AardwolfController extends Controller
         $data['items'] = [];
 
         // Generate the potential path for this menu
-        $path = self::storage_path . $data['label'];
+        $path = $this->getStoragePath($data['label']);
 
         // Check whether it already exists (duplicate)
         if (File::exists($path)) {
@@ -103,26 +129,28 @@ class AardwolfController extends Controller
     }
 
     /**
-     * Maps to the "aardwolf.edit" /edit/{slug} route
+     * Maps to the "aardwolf.edit" /edit/{label} route
      *
-     * @param string $slug The slug of the menu to edit
+     * @param string $label The label of the menu to edit
      *
      * @return mixed
      */
-    public function edit(string $slug)
+    public function edit(string $label)
     {
-        $path = self::storage_path . $slug;
+        $path = $this->getStoragePath($label);
+        $fieldset = $this->itemFieldset();
 
         if (!File::exists($path)) {
-            $this->flash->put('error', trans('addons.Aardwolf::messages.not_found'));
+            $this->flash->put('error', trans('addons.Aardwolf::messages.menu_not_found'));
             return redirect()->route('aardwolf.index');
         }
 
+        if (!$fieldset) {
+            $this->flash->put('error', trans('addons.Aardwolf::messages.fieldset_not_found'));
+            return redirect()->route('addon.settings', [ 'addon' => 'aardwolf' ]);
+        }
+
         $menu = YAML::parse(File::get($path));
-        $fieldset = Fieldset::create(
-            'item',
-            YAML::parse(File::get($this->getDirectory().'/resources/fieldsets/item.yaml'))
-        );
 
         return $this->view('edit', [
             'title' => trans('addons.Aardwolf::titles.edit', [ 'title' => $menu['title'] ]),
@@ -132,15 +160,15 @@ class AardwolfController extends Controller
     }
 
      /**
-     * Maps to the "aardwolf.update" /update/{slug} route
+     * Maps to the "aardwolf.update" /update/{label} route
      *
-     * @param string $slug The slug of the menu to edit
+     * @param string $label The label of the menu to edit
      *
      * @return mixed
      */
-    public function update(string $slug, Request $request)
+    public function update(string $label, Request $request)
     {
-        $path = self::storage_path . $slug;
+        $path = $this->getStoragePath($label);
 
         // Save it
         File::put($path, YAML::dump($request->menu));
@@ -153,15 +181,15 @@ class AardwolfController extends Controller
     }
 
     /**
-     * Maps to the "aardwolf.delete" /delete/{slug} route
+     * Maps to the "aardwolf.delete" /delete/{label} route
      *
-     * @param string $slug The slug of the menu to edit
+     * @param string $label The label of the menu to edit
      *
      * @return mixed
      */
-    public function delete(string $slug)
+    public function delete(string $label)
     {
-        $path = self::storage_path . $slug;
+        $path = $this->getStoragePath($label);
 
         // Delete it
         File::delete($path);

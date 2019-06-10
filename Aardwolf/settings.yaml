@@ -1,0 +1,5 @@
+fields:
+  header:
+    type: section
+  fieldset:
+    type: fieldset

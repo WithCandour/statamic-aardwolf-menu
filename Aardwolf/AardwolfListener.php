@@ -19,9 +19,12 @@ class AardwolfListener extends Listener
 
     public function addNavItems($nav)
     {
-        $item = Nav::item('Menu')->route('aardwolf.index')->icon('menu');
+        $menu = Nav::item('Menu')->route('aardwolf.index')->icon('menu');
+        $menu->add(function ($item) {
+            $item->add(Nav::item('Settings')->route('addon.settings', [ 'addon' => 'aardwolf' ]));
+        });
 
-        return $nav->addTo('tools', $item);
+        return $nav->addTo('tools', $menu);
     }
 
     /**
