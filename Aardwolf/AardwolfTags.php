@@ -18,7 +18,7 @@ class AardwolfTags extends Tags
     public function index()
     {
         $slug = $this->getParam('slug');
-        $path = self::storage_path . $slug;
+        $path = self::storage_path . $slug . '.yaml';
 
         if (!File::exists($path)) {
             return "<!-- Statamic\Addons\Aardwolf :: Could not load Menu with slug $slug";
